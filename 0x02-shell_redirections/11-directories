@@ -1,2 +1,2 @@
 #!/bin/bash
-finf . -mindepth 1 type d | wc -l
+finf . -mindepth 1 -type d | wc -l
