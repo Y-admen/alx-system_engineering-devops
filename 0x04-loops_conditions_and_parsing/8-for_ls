@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# displays:The content of the current directory
+for file in *; do
+    # * is a wildcard that expands to all files and directories
+    # file is nor sympolic link or directory
+    if [ ! -h "$file" ] && [ ! -d "$file" ]; then
+        # Extract part of the filename after the first dash
+        name=$(echo "$file" | cut -d'-' -f2-)
+        echo "$name"
+    fi
+done
