@@ -3,7 +3,7 @@
 i=0
 while [ $i -lt 10 ]
 do
-    if [ $i -eq 9 ];then
+    if [ $i -lt 9 ];then
 		echo "Best School"
 		echo "Hi"
 	else
