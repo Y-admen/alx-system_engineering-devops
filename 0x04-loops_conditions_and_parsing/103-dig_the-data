@@ -4,4 +4,20 @@
 #   Displays the number of occurrences, IP, and HTTP status
 #+  code of each log, in sorted order.
 
-awk '{ print $1 " " $9}' apache-access.log | sort | uniq -c | sort -rn
+if [ ! -f "$1" ]; then
+  echo "Error: File '$1' does not exist."
+  exit 1
+fi
+
+awk -v RS='\n' '
+  NF >= 9 {
+    # Extract IP and HTTP status code from the same line
+    ip=$1;
+    status=$NF-1;
+    # Concatenate and consider any remaining fields as HTTP status code
+    if (NF > 9) {
+      status=$status"-"$NF;
+    }
+    print ip "|" status;
+  }
+' "$1" | sort | uniq -c | sort -nr
