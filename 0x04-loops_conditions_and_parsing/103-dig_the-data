@@ -4,19 +4,4 @@
 #   Displays the number of occurrences, IP, and HTTP status
 #+  code of each log, in sorted order.
 
-if [ ! -f "apache-access.log" ]; then
-    echo "Error: Log file 'apache-access.log' not found."
-    exit 1
-fi
-
-if [ ! -s "apache-access.log" ]; then
-    echo "Error: Log file 'apache-access.log' is empty."
-    exit 1
-fi
-
-if ! awk 'NF<2 { exit 1 }' "apache-access.log"; then
-    echo "Error: Log file 'apache-access.log' does not contain the expected fields (IP address and HTTP status code)."
-    exit 1
-fi
-
 awk '{ print $1 " " $9}' apache-access.log | sort | uniq -c | sort -rn
