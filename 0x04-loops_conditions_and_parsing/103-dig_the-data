@@ -4,48 +4,19 @@
 #   Displays the number of occurrences, IP, and HTTP status
 #+  code of each log, in sorted order.
 
-file="$1"
-
-# Validate input file existence
-if [ ! -f "$file" ]; then
-  echo "Error: File '$file' does not exist."
-  exit 1
+if [ ! -f "apache-access.log" ]; then
+    echo "Error: Log file 'apache-access.log' not found."
+    exit 1
 fi
 
-# Check file size using wc -l (more efficient for large files)
-if [ $(wc -l < "$file") -eq 0 ]; then
-  echo "Warning: File '$file' is empty."
-  exit 0
+if [ ! -s "apache-access.log" ]; then
+    echo "Error: Log file 'apache-access.log' is empty."
+    exit 1
 fi
 
-# Utilize awk for parsing and handling various log file formats
-awk -v RS='\n' '
-  # Basic validation: at least 3 fields and first field not empty
-  NF >= 3 && $1 !~ /^\s*$/ {
-    # Extract IP: consider different field positions
-    ip=$1;
-    if (NF > 3 && $2 ~ /^[0-9]+$/) {
-      # IP might be in the second field if the first is empty
-      ip=$2;
-    }
+if ! awk 'NF<2 { exit 1 }' "apache-access.log"; then
+    echo "Error: Log file 'apache-access.log' does not contain the expected fields (IP address and HTTP status code)."
+    exit 1
+fi
 
-    # Extract status code: consider different possibilities
-    status=$NF;
-    if (NF > 3 && $NF-1 ~ /^[0-9]+$/) {
-      # Status code might be the second-to-last field with multiple fields
-      status=$NF-1;
-    }
-
-    # Concatenate remaining fields if needed
-    if (NF > 4) {
-      status=$status"-"$(NF-1);
-    }
-
-    # Handle invalid lines if necessary (add logic if needed)
-    # if (invalid_condition) {
-    #   # Handle invalid line (e.g., print message)
-    # } else {
-      print ip "|" status;
-    # }
-  }
-' "$file" | sort | uniq -c | sort -nr
+awk '{ print $1 " " $9}' apache-access.log | sort | uniq -c | sort -rn
