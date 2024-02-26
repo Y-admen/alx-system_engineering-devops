@@ -4,20 +4,48 @@
 #   Displays the number of occurrences, IP, and HTTP status
 #+  code of each log, in sorted order.
 
-if [ ! -f "$1" ]; then
-  echo "Error: File '$1' does not exist."
+file="$1"
+
+# Validate input file existence
+if [ ! -f "$file" ]; then
+  echo "Error: File '$file' does not exist."
   exit 1
 fi
 
+# Check file size using wc -l (more efficient for large files)
+if [ $(wc -l < "$file") -eq 0 ]; then
+  echo "Warning: File '$file' is empty."
+  exit 0
+fi
+
+# Utilize awk for parsing and handling various log file formats
 awk -v RS='\n' '
-  NF >= 9 {
-    # Extract IP and HTTP status code from the same line
+  # Basic validation: at least 3 fields and first field not empty
+  NF >= 3 && $1 !~ /^\s*$/ {
+    # Extract IP: consider different field positions
     ip=$1;
-    status=$NF-1;
-    # Concatenate and consider any remaining fields as HTTP status code
-    if (NF > 9) {
-      status=$status"-"$NF;
+    if (NF > 3 && $2 ~ /^[0-9]+$/) {
+      # IP might be in the second field if the first is empty
+      ip=$2;
     }
-    print ip "|" status;
+
+    # Extract status code: consider different possibilities
+    status=$NF;
+    if (NF > 3 && $NF-1 ~ /^[0-9]+$/) {
+      # Status code might be the second-to-last field with multiple fields
+      status=$NF-1;
+    }
+
+    # Concatenate remaining fields if needed
+    if (NF > 4) {
+      status=$status"-"$(NF-1);
+    }
+
+    # Handle invalid lines if necessary (add logic if needed)
+    # if (invalid_condition) {
+    #   # Handle invalid line (e.g., print message)
+    # } else {
+      print ip "|" status;
+    # }
   }
-' "$1" | sort | uniq -c | sort -nr
+' "$file" | sort | uniq -c | sort -nr
