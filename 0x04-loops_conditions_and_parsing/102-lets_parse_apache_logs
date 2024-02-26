@@ -2,26 +2,18 @@
 # Parses Apache log files in list format.
 #   Displays the IP and HTTP status code.
 
-logfile="apache-access.log"
+if [ -e "school" ]; then
+    echo "school file exists"
 
-if [ ! -e "$logfile" ]; then
-    echo "Error: Log file '$logfile' doesn't exist."
-    exit 1
+    if [ ! -s "school" ]; then
+        echo "school file is empty"
+    else
+        echo "school file is not empty"
+    fi
+
+    if [ -f "school" ]; then
+        echo "school is a regular file"
+    fi
+else
+    echo "school file does not exist"
 fi
-
-if [ ! -f "$logfile" ]; then
-    echo "Error: Log file '$logfile' is not a regular file."
-    exit 1
-fi
-
-if [ ! -s "$logfile" ]; then
-    echo "Error: Log file '$logfile' is empty."
-    exit 1
-fi
-
-if [ -d "$logfile" ]; then
-    echo "Error: Log file '$logfile' is a directory."
-    exit 1
-fi
-
-awk '{print $1 " " $9}' "$logfile"
